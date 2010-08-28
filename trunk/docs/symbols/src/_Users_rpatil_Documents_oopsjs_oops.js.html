@@ -1,0 +1,225 @@
+<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"> <style>
+	.KEYW {color: #933;}
+	.COMM {color: #bbb; font-style: italic;}
+	.NUMB {color: #393;}
+	.STRN {color: #393;}
+	.REGX {color: #339;}
+	.line {border-right: 1px dotted #666; color: #666; font-style: normal;}
+	</style></head><body><pre><span class='line'>  1</span> <span class="COMM">/*
+<span class='line'>  2</span>  * Copyright 2010 Rajendra Patil 
+<span class='line'>  3</span>  *
+<span class='line'>  4</span>  *  Licensed under the Apache License, Version 2.0 (the "License");
+<span class='line'>  5</span>  *  you may not use this file except in compliance with the License.
+<span class='line'>  6</span>  *  You may obtain a copy of the License at
+<span class='line'>  7</span>  *
+<span class='line'>  8</span>  *      http://www.apache.org/licenses/LICENSE-2.0
+<span class='line'>  9</span>  *
+<span class='line'> 10</span>  *  Unless required by applicable law or agreed to in writing, software
+<span class='line'> 11</span>  *  distributed under the License is distributed on an "AS IS" BASIS,
+<span class='line'> 12</span>  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+<span class='line'> 13</span>  *  See the License for the specific language governing permissions and
+<span class='line'> 14</span>  *  limitations under the License.
+<span class='line'> 15</span>  *  
+<span class='line'> 16</span>  */</span><span class="WHIT">
+<span class='line'> 17</span> </span><span class="COMM">/**
+<span class='line'> 18</span>  * &lt;p>This method ensures that current class has defined instance methods as defined by an implementing interfaces otherwises throws an error.&lt;p>
+<span class='line'> 19</span>  * 
+<span class='line'> 20</span>  * &lt;h3>Usage&lt;/h3>
+<span class='line'> 21</span>  * &lt;h4>1. Define an interface - as JSON object&lt;/h4>
+<span class='line'> 22</span>  *  &lt;pre>
+<span class='line'> 23</span>  *	var IRenderable = {
+<span class='line'> 24</span>  *		//no body please. leave it empty.
+<span class='line'> 25</span>  * 		&lt;b>render: function(){};&lt;/b> 
+<span class='line'> 26</span>  *	};
+<span class='line'> 27</span>  *	&lt;/pre>
+<span class='line'> 28</span>  * &lt;h4>2. Define your class and say it implemets an interface&lt;/h4>
+<span class='line'> 29</span>  *  &lt;pre>
+<span class='line'> 30</span>  *	var CuteButton = function(){
+<span class='line'> 31</span>  *		....
+<span class='line'> 32</span>  *		//implemented method as guided by an interface IRenderable 
+<span class='line'> 33</span>  *		&lt;b>this.render = function(){...here you define body...}&lt;/b>
+<span class='line'> 34</span>  *		....
+<span class='line'> 35</span>  *		
+<span class='line'> 36</span>  *	}.&lt;b>implements(IRenderable)&lt;/b>; 
+<span class='line'> 37</span>  *	//will throw exception if render method is not defined 
+<span class='line'> 38</span>  *	&lt;/pre>
+<span class='line'> 39</span>  * &lt;h4>3. You can implement multiple interfaces as &lt;/h4>
+<span class='line'> 40</span>  *  &lt;pre>
+<span class='line'> 41</span>  *	var CuteButton = function(){
+<span class='line'> 42</span>  * 		...
+<span class='line'> 43</span>  *	}.&lt;b>implements(IRenderable,IClickable);&lt;/b>; 
+<span class='line'> 44</span>  *  &lt;/pre> 
+<span class='line'> 45</span>  *	&lt;h4>OR like this&lt;/h4>
+<span class='line'> 46</span>  *  &lt;pre>
+<span class='line'> 47</span>  *	var CuteButton = function(){
+<span class='line'> 48</span>  * 		...
+<span class='line'> 49</span>  *	}.&lt;b>implements(IRenderable).implements(IClickable);&lt;/b>; 
+<span class='line'> 50</span>  *  &lt;/pre>
+<span class='line'> 51</span>  *
+<span class='line'> 52</span>  * @param iFaces comma separated list interfaces to be implemented
+<span class='line'> 53</span>  * @returns this - the same class 
+<span class='line'> 54</span>  */</span><span class="WHIT">
+<span class='line'> 55</span> </span><span class="NAME">Function.prototype.implements</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">iFaces</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 56</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">org</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 57</span> </span><span class="WHIT">	</span><span class="KEYW">for</span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">l</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">arguments.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">l</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 58</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">iFace</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">arguments</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 59</span> </span><span class="WHIT">		</span><span class="KEYW">for</span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">m</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">iFace</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 60</span> </span><span class="WHIT">        	</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">m</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">m</span><span class="WHIT"> </span><span class="PUNC">!=</span><span class="WHIT"> </span><span class="STRN">"_super"</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">m</span><span class="WHIT"> </span><span class="PUNC">!=</span><span class="WHIT"> </span><span class="STRN">"implements"</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">m</span><span class="WHIT"> </span><span class="PUNC">!=</span><span class="WHIT"> </span><span class="STRN">"inherits"</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">iFace</span><span class="PUNC">[</span><span class="NAME">m</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">!=</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">org</span><span class="PUNC">[</span><span class="NAME">m</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 61</span> </span><span class="WHIT">				</span><span class="KEYW">throw</span><span class="PUNC">(</span><span class="NAME">this.toSource</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">" does not implement '"</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">m</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="STRN">"'"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 62</span> </span><span class="WHIT">        	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 63</span> </span><span class="WHIT">    	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 64</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 65</span> </span><span class="WHIT">	</span><span class="KEYW">delete</span><span class="WHIT"> </span><span class="NAME">org</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 66</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 67</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 68</span> 
+<span class='line'> 69</span> </span><span class="COMM">/**
+<span class='line'> 70</span>  * &lt;p>This method redefines your class with capabilities from parentClass and extends/overrides it with your own class capabailities. 
+<span class='line'> 71</span>  *	The private vars and methods from parent class are also inherited. The inherited class can use &lt;b>_super&lt;/b> variable to access parent's vars/methods 
+<span class='line'> 72</span>  * &lt;p>
+<span class='line'> 73</span>  * 
+<span class='line'> 74</span>  * &lt;h3>Usage&lt;/h3>
+<span class='line'> 75</span>  * &lt;h4>1. Define your class &lt;/h4>
+<span class='line'> 76</span>  *  &lt;pre>
+<span class='line'> 77</span>  *	var Employee = function(){
+<span class='line'> 78</span>  * 
+<span class='line'> 79</span>  *		//private variables	- actually protected - will be inherited
+<span class='line'> 80</span>  *		var _name;
+<span class='line'> 81</span>  *		var _employeeId;
+<span class='line'> 82</span>  *		
+<span class='line'> 83</span>  *		//private methods - actually protected - will be inherited
+<span class='line'> 84</span>  *		var _setName(name){
+<span class='line'> 85</span>  *			_name = name;
+<span class='line'> 86</span>  *		} 
+<span class='line'> 87</span>  *
+<span class='line'> 88</span>  *		//public methods
+<span class='line'> 89</span>  *		//Constructor
+<span class='line'> 90</span>  *		this.init = function(name,id){
+<span class='line'> 91</span>  *			_name = name;
+<span class='line'> 92</span>  *			_employeeId = id;
+<span class='line'> 93</span>  *		};
+<span class='line'> 94</span>  * 		
+<span class='line'> 95</span>  *		this.getName = function(){
+<span class='line'> 96</span>  *			return _name;
+<span class='line'> 97</span>  *		};
+<span class='line'> 98</span>  *		
+<span class='line'> 99</span>  *		this.getEmployeeId = function(){
+<span class='line'>100</span>  *			return _employeeId;
+<span class='line'>101</span>  *		};
+<span class='line'>102</span>  *	};
+<span class='line'>103</span>  *	&lt;/pre>
+<span class='line'>104</span>  * &lt;h4>2. Derive the child class from above class&lt;/h4>
+<span class='line'>105</span>  *  &lt;pre>
+<span class='line'>106</span>  *	var Manager = function(){
+<span class='line'>107</span>  *		
+<span class='line'>108</span>  * 		//own private var	
+<span class='line'>109</span>  *		var _reportees = []; 
+<span class='line'>110</span>  *
+<span class='line'>111</span>  *		//own private methods
+<span class='line'>112</span>  *		var _addReportee = function(employee){
+<span class='line'>113</span>  *			_reportees.push(employee);
+<span class='line'>114</span>  *		};
+<span class='line'>115</span>  *		
+<span class='line'>116</span>  *		//own public methods
+<span class='line'>117</span>  *		//Constructor
+<span class='line'>118</span>  *		this.init = function(name,id){
+<span class='line'>119</span>  *			_super.init(name,id);//_super points to parent
+<span class='line'>120</span>  *			_reportees = [];	
+<span class='line'>121</span>  *		};
+<span class='line'>122</span>  * 		//Method overridding
+<span class='line'>123</span>  *		this.getName = function(){
+<span class='line'>124</span>  *			return _super._getName(); //calling super private method
+<span class='line'>125</span>  *		};
+<span class='line'>126</span>  *		
+<span class='line'>127</span>  *		this.getReportees = function(){
+<span class='line'>128</span>  *			return this._reportees;
+<span class='line'>129</span>  *		}
+<span class='line'>130</span>  *		
+<span class='line'>131</span>  *	}.&lt;b>inherits(Employee)&lt;/b>; 
+<span class='line'>132</span>  *	...
+<span class='line'>133</span>  *	...
+<span class='line'>134</span>  *  &lt;style>i{color:red}&lt;/style> 
+<span class='line'>135</span>  *	&lt;b>var e = new Employee().init("rpatil","1");
+<span class='line'>136</span>  *	e.getName();
+<span class='line'>137</span>  *	e.getEmployeeId();
+<span class='line'>138</span>  *	e instanceof Employee;&lt;/b> //true 
+<span class='line'>139</span>  *
+<span class='line'>140</span>  *	e.&lt;b>_setName&lt;/b>("NewName");//&lt;b>&lt;i>Not allowed - private method - ERROR&lt;/i>&lt;/b>
+<span class='line'>141</span>  *	e.&lt;b>_name&lt;/b>;//&lt;b>&lt;i>Not allowd - private var - ERROR&lt;/i>&lt;/b>
+<span class='line'>142</span>  * 
+<span class='line'>143</span>  *	&lt;b>var m = new Manager().init("sumit","2");&lt;/b>
+<span class='line'>144</span>  *
+<span class='line'>145</span>  *	m.getName(); //Overrided - will be called from manager
+<span class='line'>146</span>  *	m.getEmployeeId(); //Inherited - will be called from Employee
+<span class='line'>147</span>  *	m.getReportees();
+<span class='line'>148</span>  *	m instanceof Manager; //true
+<span class='line'>149</span>  *	&lt;b>m instanceof Employee;&lt;/b> //false. This doesn't work :(
+<span class='line'>150</span>  *
+<span class='line'>151</span>  *	m.&lt;b>_reportees&lt;/b>;//&lt;b>&lt;i>Not allowed - private var - ERROR&lt;/i>&lt;/b>
+<span class='line'>152</span>  *	m.&lt;b>_super&lt;/b>;//&lt;b>&lt;i>Not allowed - _super? what is that? - ERROR&lt;/i>&lt;/b>
+<span class='line'>153</span>  *	m._name;//Not allowed - private var inherited from parent - public access not allowd.
+<span class='line'>154</span>  *	...
+<span class='line'>155</span>  * 
+<span class='line'>156</span>  *	&lt;/pre>
+<span class='line'>157</span>  * &lt;h4>3. You can inherit and implement at the same time &lt;/h4>
+<span class='line'>158</span>  *  &lt;pre>
+<span class='line'>159</span>  *	var Manager = function(){
+<span class='line'>160</span>  * 		...
+<span class='line'>161</span>  *	}.&lt;b>inherits(Employee).implements(IAuthor);&lt;/b>; 
+<span class='line'>162</span>  *	//Manager is inheriting employee and implementing IAuthor
+<span class='line'>163</span>  * &lt;/pre>
+<span class='line'>164</span>  * &lt;p>and this is how &lt;b>IAuthor&lt;/b> may look like&lt;/p>
+<span class='line'>165</span>  *  &lt;pre>
+<span class='line'>166</span>  *	var IAuthor = {
+<span class='line'>167</span>  *		writeBooks:function(){...}
+<span class='line'>168</span>  *	}
+<span class='line'>169</span>  *  &lt;/pre> 
+<span class='line'>170</span>  *
+<span class='line'>171</span>  * @param parentClass name of the parent class from which this class will inherit properties.
+<span class='line'>172</span>  * @returns newClass - the new redifined class with properties from parent class + child class 
+<span class='line'>173</span>  */</span><span class="WHIT">
+<span class='line'>174</span> 
+<span class='line'>175</span> </span><span class="NAME">Function.prototype.inherits</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">parentClass</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>176</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">op</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">parentClass</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>177</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">oo</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>178</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">_s</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">"_s$s_"</span><span class="PUNC">;</span><span class="COMM">//Prefix for parent methods</span><span class="WHIT">
+<span class='line'>179</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">d</span><span class="WHIT">  </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Function.depth</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">undefined</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">Function.depth</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">Function.depth</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Function.depth</span><span class="PUNC">+</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>180</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">parentProps</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parentClass.toString</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/\\s+/ig</span><span class="PUNC">,</span><span class="STRN">" "</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/}$/</span><span class="PUNC">,</span><span class="STRN">""</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>181</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">childProps</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.toString</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/\\s+/ig</span><span class="PUNC">,</span><span class="STRN">" "</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/function\s*(\w+)?\(\)\s*{/</span><span class="PUNC">,</span><span class="STRN">""</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>182</span> </span><span class="WHIT">	
+<span class='line'>183</span> 	</span><span class="COMM">//Comment below code if we want multiple inheritance </span><span class="WHIT">
+<span class='line'>184</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">childProps.indexOf</span><span class="PUNC">(</span><span class="STRN">"_s$s_"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">></span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>185</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="STRN">"Multiple inheritance not allowed."</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>186</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>187</span> </span><span class="WHIT">	</span><span class="KEYW">while</span><span class="PUNC">(</span><span class="NAME">d</span><span class="PUNC">--</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="NAME">_s</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">"_"</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>188</span> </span><span class="WHIT">	
+<span class='line'>189</span> 	</span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">m</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">op</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>190</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">oo</span><span class="PUNC">[</span><span class="NAME">m</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">undefined</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>191</span> </span><span class="WHIT">			</span><span class="COMM">// i.e m in parent is not overridden in child - so _super.m should resolve to this.m in this </span><span class="WHIT">
+<span class='line'>192</span> </span><span class="WHIT">			</span><span class="COMM">// as all parent m's are inherited to child automatically</span><span class="WHIT">
+<span class='line'>193</span> </span><span class="WHIT">			</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">rgx</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">RegExp</span><span class="PUNC">(</span><span class="STRN">"_super\\.("</span><span class="PUNC">+</span><span class="NAME">m</span><span class="PUNC">+</span><span class="STRN">")\s*(\(\))"</span><span class="PUNC">,</span><span class="STRN">"ig"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>194</span> </span><span class="WHIT">			</span><span class="NAME">childProps</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">childProps.replace</span><span class="PUNC">(</span><span class="NAME">rgx</span><span class="PUNC">,</span><span class="STRN">"(typeof(this.$1) !== 'undefined' && ('_s$s_'==='_s$s_') ? this.$1$2 : $1$2)"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> 
+<span class='line'>195</span> 			</span><span class="COMM">//&& condition above is kind of marker to detect already inherited class</span><span class="WHIT">
+<span class='line'>196</span> </span><span class="WHIT">			</span><span class="KEYW">continue</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>197</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>198</span> </span><span class="WHIT">		</span><span class="COMM">// i.e m in parent is overridden in child - so rename parent m and resolve super.m in child to renamed m</span><span class="WHIT">
+<span class='line'>199</span> </span><span class="WHIT">		</span><span class="NAME">parentProps</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parentProps.replace</span><span class="PUNC">(</span><span class="STRN">"this."</span><span class="PUNC">+</span><span class="NAME">m</span><span class="PUNC">,</span><span class="STRN">"var "</span><span class="PUNC">+</span><span class="NAME">_s</span><span class="PUNC">+</span><span class="NAME">m</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>200</span> </span><span class="WHIT">		</span><span class="NAME">childProps</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">childProps.replace</span><span class="PUNC">(</span><span class="STRN">"_super."</span><span class="PUNC">+</span><span class="NAME">m</span><span class="PUNC">,</span><span class="NAME">_s</span><span class="PUNC">+</span><span class="NAME">m</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>201</span> </span><span class="WHIT">		</span><span class="KEYW">delete</span><span class="WHIT"> </span><span class="NAME">_s</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>202</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>203</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">rgx</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="REGX">/_super.(\w+)/ig</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="COMM">//There is no real _super :). So in super.m, child actually trying to access private (actually protected) m of super which is already inherited by child</span><span class="WHIT">
+<span class='line'>204</span> </span><span class="WHIT">	</span><span class="COMM">// so replace super.m for private m's to just m's in child which are availble in child if were there is parent;</span><span class="WHIT">
+<span class='line'>205</span> </span><span class="WHIT">	</span><span class="NAME">childProps</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">childProps.replace</span><span class="PUNC">(</span><span class="NAME">rgx</span><span class="PUNC">,</span><span class="STRN">"$1"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>206</span> </span><span class="WHIT">	
+<span class='line'>207</span> 	</span><span class="NAME">newObjectProps</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">"("</span><span class="PUNC">+</span><span class="NAME">parentProps</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">childProps</span><span class="PUNC">+</span><span class="STRN">")"</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>208</span> </span><span class="WHIT">	</span><span class="KEYW">delete</span><span class="WHIT"> </span><span class="NAME">op</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>209</span> </span><span class="WHIT">	</span><span class="KEYW">delete</span><span class="WHIT"> </span><span class="NAME">oo</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>210</span> </span><span class="WHIT">	</span><span class="KEYW">delete</span><span class="WHIT"> </span><span class="NAME">parentProps</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>211</span> </span><span class="WHIT">	</span><span class="KEYW">delete</span><span class="WHIT"> </span><span class="NAME">childProps</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>212</span> </span><span class="WHIT">	</span><span class="KEYW">delete</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>213</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">eval</span><span class="PUNC">(</span><span class="NAME">newObjectProps</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> 
+<span class='line'>214</span> 	</span><span class="COMM">// eval is EVIL but we need it here. how it will hurt us? (yes - performance is slow, any others? like loosing context anything.)</span><span class="WHIT">
+<span class='line'>215</span> </span><span class="WHIT">	</span><span class="COMM">// So far I found it to be working the way it is expected.</span><span class="WHIT">
+<span class='line'>216</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>217</span> 
+<span class='line'>218</span> </span></pre></body></html>
