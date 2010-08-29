@@ -81,24 +81,27 @@ Function.prototype.implements = function(iFaces){
  *		var _employeeId;
  *		
  *		//private methods - actually protected - will be inherited
- *		var _setName(name){
+ *		var _setName = function(name){
  *			_name = name;
  *		} 
- *
+ *		var _getName = function(){
+ *			return _name;
+ *		}
  *		//public methods
  *		//Constructor
  *		this.init = function(name,id){
  *			_name = name;
  *			_employeeId = id;
- *		};
+			return this; //Most IMP - init must return this;		
+ *		}
  * 		
  *		this.getName = function(){
  *			return _name;
- *		};
+ *		}
  *		
  *		this.getEmployeeId = function(){
  *			return _employeeId;
- *		};
+ *		}
  *	};
  *	</pre>
  * <h4>2. Derive the child class from above class</h4>
@@ -111,21 +114,22 @@ Function.prototype.implements = function(iFaces){
  *		//own private methods
  *		var _addReportee = function(employee){
  *			_reportees.push(employee);
- *		};
+ *		}
  *		
  *		//own public methods
  *		//Constructor
  *		this.init = function(name,id){
  *			_super.init(name,id);//_super points to parent
  *			_reportees = [];	
+ *			return this;//Most IMP - init must return this;		
  *		};
  * 		//Method overridding
  *		this.getName = function(){
- *			return _super._getName(); //calling super private method
- *		};
+ *			return _super._getName(); //calling super's private method
+ *		}
  *		
  *		this.getReportees = function(){
- *			return this._reportees;
+ *			return _reportees;
  *		}
  *		
  *	}.<b>inherits(Employee)</b>; 
@@ -210,6 +214,7 @@ Function.prototype.inherits = function(parentClass){
 	delete parentProps;
 	delete childProps;
 	delete this;
+	//console.log(newObjectProps);
 	return eval(newObjectProps); 
 	// eval is EVIL but we need it here. how it will hurt us? (yes - performance is slow, any others? like loosing context anything.)
 	// So far I found it to be working the way it is expected.
