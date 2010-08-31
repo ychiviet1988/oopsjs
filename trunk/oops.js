@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Rajendra Patil 
+ * Copyright 2010 Rajendra Patil
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 /**
  * <p>This method ensures that current class has defined instance methods as defined by an implementing interfaces otherwises throws an error.<p>
@@ -57,13 +57,89 @@ Function.prototype.implements = function(iFaces){
 	for(var i = 0, l = arguments.length; i < l; i++){
 		var iFace = arguments[i];
 		for(var m in iFace){
+			if(m && !iFace[m]._isEmpty()){
+				throw("Interface method " + m + " should not have body."); 
+			}
         	if(m && m != "_super" && m != "implements" && m != "inherits" && typeof(iFace[m]) != typeof(org[m])){
 				throw(this.toSource() + " does not implement '" + m +"'");
         	}
+			if(typeof(iFace[m]) === "function" && iFace[m].arity !== org[m].arity){
+				throw(this.toSource() + " does not implement proper '" + m +"'. Should have '" + iFace[m].arity + "' argument(s) but found '" + org[m].arity+"'");
+			}
     	}
 	}
 	delete org;
     return this;
+};
+/**
+@private
+This is internal helper method to check function is empty function or has body
+*/
+Function.prototype._isEmpty = function(){
+	var s = this.toSource().replace(/[ \t\n]+/," ");
+	if(s){
+		s = s.replace(/\s*\(function\s*(\w+)?\s*\([ \t\w]*\)[ \t]*\{[ \t\r\n]*\}\s*\)/img,"");
+		if(s.length > 0){
+			return false;
+		}
+	}
+	return true;
+};
+
+/**
+ * <p>Can be called on functions. Should actually be called on class's internal function to mark it as abstract
+ * Abstract method should have no body and it should be implemented by child class or child class can again mark
+ * it as abstract</p>
+ * <h3>Usage</h3>
+ * <h4>1. Define a class empty method and mark it as abstract</h4>
+ * <pre>
+ *  var MyClass = function(){
+ *      ...
+ *      this.exampleAbstractMethod = function(){}.<b>isAbstract()</b>;
+ *      ...
+ *  }
+ * </pre>
+ *
+ * <p> This ensures that any class which inherits MyClass should have written body for this method.
+ * Child class again mark this method as abstract if it wants to delegate responsibility further down
+ * in the hierarchy 
+ * </p>
+ *
+ */
+ 
+Function.prototype.isAbstract = function(){
+	
+	if(!this._isEmpty()){ //this is a class method
+		throw("Abstract method should not have body."); 
+	}
+	return function(){var __abstract__ = 'Abstract';throw(__abstract__+" method can't be called.")};
+};
+
+/**
+ * <p>Can be called on functions. Should actually be called on class's internal function to mark it as final method.
+ * This is kind of reverse of Abstract method. Final method can't be overrided by the child class once marked as final
+ * in the parent class.</p>
+ *
+ * <h3>Usage</h3>
+ * <h4>1. Define a class method and mark it as final</h4>
+ * <pre>
+ *  var MyClass = function(){
+ * 	    ...
+ *      this.exampleFinalMethod = function(){
+ *          ...
+ *      }<b>.isFinal()</b>; //now child can't redefine it.
+ * 		...
+ *  }
+ * </pre>
+ *
+ * <p> This ensures that any class which inherits MyClass can never override body for this method.
+ * It has to be inherited from parent only.</p>
+ * 
+ *
+ */
+Function.prototype.isFinal = function(){
+	var me = this;
+	return function(){var __final__ = 'Final'; return me.call(arguments);};
 };
 
 /**
@@ -192,12 +268,20 @@ Function.prototype.inherits = function(parentClass){
 	
 	for(m in op){
 		if(oo[m] === undefined) {
+			//console.log(m+"=>"+op[m].toSource());//.toSource());
+			if(op[m].toSource().indexOf("__abstract__") > 0){
+				throw ("Method '"+m+"' is abstract in parent class. Child class MUST override it.");
+			}
+		
 			// i.e m in parent is not overridden in child - so _super.m should resolve to this.m in this 
 			// as all parent m's are inherited to child automatically
 			var rgx = new RegExp("_super\\.("+m+")\s*(\(\))","ig");
 			childProps = childProps.replace(rgx,"(typeof(this.$1) !== 'undefined' && ('_s$s_'==='_s$s_') ? this.$1$2 : $1$2)"); 
 			//&& condition above is kind of marker to detect already inherited class
 			continue;
+		}
+		if(op[m].toSource().indexOf("__final__") > 0){
+				throw ("Method '"+m+"' is final in parent class. Child class CAN'T override it.");
 		}
 		// i.e m in parent is overridden in child - so rename parent m and resolve super.m in child to renamed m
 		parentProps = parentProps.replace("this."+m,"var "+_s+m);
