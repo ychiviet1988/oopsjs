@@ -153,7 +153,7 @@ Function.prototype.isFinal = function(){
 	}catch(ex){
 
 	}
-	return function(){var __final__ = 'Final'; return me.class(arguments);};
+	return function(){var __final__ = 'Final'; return me.call(arguments);};
 };
 
 /**
