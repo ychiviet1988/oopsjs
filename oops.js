@@ -14,6 +14,14 @@
  *  limitations under the License.
  *
  */
+/** To get class/function string on browsers where toSource is not available
+ */
+ if(!Function.prototype.toSource){
+     Function.prototype.toSource = function(){
+         return "("+this.toString()+")";
+     }
+ }
+ 
 /**
  * <p>This method ensures that current class has defined instance methods as defined by an implementing interfaces otherwises throws an error.<p>
  * 
@@ -108,7 +116,6 @@ Function.prototype._isEmpty = function(){
  */
  
 Function.prototype.isAbstract = function(){
-	
 	if(!this._isEmpty()){ //this is a class method
 		throw("Abstract method should not have body."); 
 	}
@@ -139,7 +146,14 @@ Function.prototype.isAbstract = function(){
  */
 Function.prototype.isFinal = function(){
 	var me = this;
-	return function(){var __final__ = 'Final'; return me.call(arguments);};
+	try{
+	    var obj = new this();
+	    if(obj.init)
+	        return function(){var __finalclass__ = 'FinalClass';return new me(arguments);};
+	}catch(ex){
+
+	}
+	return function(){var __final__ = 'Final'; return me.class(arguments);};
 };
 
 /**
@@ -253,12 +267,18 @@ Function.prototype.isFinal = function(){
  */
 
 Function.prototype.inherits = function(parentClass){
+    var checkIfInheritable = function(aClassString){
+        if(aClassString.indexOf("__finalclass__") > 0){
+	        throw ("Final class can't be inherited.");
+        }
+    }
 	var op = new parentClass();
 	var oo = new this();
+    var parentProps = parentClass.toString().replace(/\\s+/ig," ").replace(/}$/,"");
+    checkIfInheritable(parentProps);
+    var childProps = this.toString().replace(/\\s+/ig," ").replace(/function\s*(\w+)?\(\)\s*{/,"");
 	var _s = "_s$s_";//Prefix for parent methods
 	var d  = Function.depth === undefined ? (Function.depth = 0) : (Function.depth = Function.depth+1);
-	var parentProps = parentClass.toString().replace(/\\s+/ig," ").replace(/}$/,"");
-	var childProps = this.toString().replace(/\\s+/ig," ").replace(/function\s*(\w+)?\(\)\s*{/,"");
 	
 	//Comment below code if we want multiple inheritance 
 	if(childProps.indexOf("_s$s_") > 0){
