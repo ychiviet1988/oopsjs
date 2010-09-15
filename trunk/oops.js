@@ -149,15 +149,15 @@ Function.prototype.isFinal = function(){
 	try{
 	    var obj = new this();
 	    if(obj.init)
-	        return function(){var __finalclass__ = 'FinalClass';return new me(arguments);};
+	        return function(){var __finalclass__ = 'FinalClass';me.apply(obj,arguments); return obj;};
 	}catch(ex){
 
 	}
-	return function(){var __final__ = 'Final'; return me.call(arguments);};
+	return function(){var __final__ = 'Final'; return me.apply(me,arguments);};
 };
 
 /**
- * <p>This method redefines your class with capabilities from parentClass and extends/overrides it with your own class capabailities. 
+ * <p>This method redefines your class with capabilities from parentClass and extends/overrides it with your own class capabilities. 
  *	The private vars and methods from parent class are also inherited. The inherited class can use <b>_super</b> variable to access parent's vars/methods 
  * <p>
  * 
@@ -213,7 +213,7 @@ Function.prototype.isFinal = function(){
  *			_reportees = [];	
  *			return this;//Most IMP - init must return this;		
  *		};
- * 		//Method overridding
+ * 		//Method overriding
  *		this.getName = function(){
  *			return _super._getName(); //calling super's private method
  *		}
@@ -232,11 +232,11 @@ Function.prototype.isFinal = function(){
  *	e instanceof Employee;</b> //true 
  *
  *	e.<b>_setName</b>("NewName");//<b><i>Not allowed - private method - ERROR</i></b>
- *	e.<b>_name</b>;//<b><i>Not allowd - private var - ERROR</i></b>
+ *	e.<b>_name</b>;//<b><i>Not allowed - private var - ERROR</i></b>
  * 
  *	<b>var m = new Manager().init("sumit","2");</b>
  *
- *	m.getName(); //Overrided - will be called from manager
+ *	m.getName(); //Overridden - will be called from manager
  *	m.getEmployeeId(); //Inherited - will be called from Employee
  *	m.getReportees();
  *	m instanceof Manager; //true
@@ -263,7 +263,7 @@ Function.prototype.isFinal = function(){
  *  </pre> 
  *
  * @param parentClass name of the parent class from which this class will inherit properties.
- * @returns newClass - the new redifined class with properties from parent class + child class 
+ * @returns newClass - the new redefined class with properties from parent class + child class 
  */
 
 Function.prototype.inherits = function(parentClass){
@@ -317,9 +317,9 @@ Function.prototype.inherits = function(parentClass){
 	delete oo;
 	delete parentProps;
 	delete childProps;
-	delete this;
+	//delete this; some browsers don't allow to delete this
 	//console.log(newObjectProps);
-	return eval(newObjectProps); 
+	return eval(newObjectProps);
 	// eval is EVIL but we need it here. how it will hurt us? (yes - performance is slow, any others? like loosing context anything.)
 	// So far I found it to be working the way it is expected.
 };
