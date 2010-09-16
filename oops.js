@@ -275,6 +275,9 @@ Function.prototype.inherits = function(parentClass){
 	var op = new parentClass();
 	var oo = new this();
     var parentProps = parentClass.toString().replace(/\\s+/ig," ").replace(/}$/,"");
+    if(parentProps.indexOf("[native code]") > 0){
+        return this.inheritsNative(parentClass);
+    }
     checkIfInheritable(parentProps);
     var childProps = this.toString().replace(/\\s+/ig," ").replace(/function\s*(\w+)?\(\)\s*{/,"");
 	var _s = "_s$s_";//Prefix for parent methods
@@ -323,4 +326,50 @@ Function.prototype.inherits = function(parentClass){
 	// eval is EVIL but we need it here. how it will hurt us? (yes - performance is slow, any others? like loosing context anything.)
 	// So far I found it to be working the way it is expected.
 };
+
+/**
+ * This function adds ability to inherit from native Objects for example defining your own Array by inheriting native Array object;
+ * Original Array object is unchanged and new custom array with capabilities like original array + your own methods/properties
+ * gets defined.
+ * eg.
+ * <pre>
+ * var MyArray = function(){
+ *   this.myPush = function(obj){
+ *       console.log("My push called for "+obj);
+ *       this.push(obj);
+ *   };
+ *   this.push = function(obj){
+ *      console.log("Overrided push called for " + obj + " ");
+ *      this._super.push(obj);
+ *   };
+
+}.inheritsNative(Array);
+
+ * </pre>
+ */
+Function.prototype.inheritsNative = function(nativeClass){
+    var oo = new this();
+    var me = this;
+    return (function(){
+        var op = new nativeClass();
+        op["_super"] = op;
+        for(m in oo){
+            if(op[m] === undefined) { //not overriding - parent don't have this method
+                if(oo[m].toSource().match(/[^\.]_super/igm)){
+                    op[m] = eval(oo[m].toSource().replace(/_super/igm,"this._super"));
+                }
+                //op[m] = oo[m]; //Assign parent method to child
+            }else{ //overriding - parent op already has this method
+                var opm = op[m]; //make a copy
+                if(oo[m].toSource().match(/[^\.]_super/igm)){
+                    op[m] = eval(oo[m].toSource().replace(/_super/igm,"this._super"));
+                }
+                //op[m] = oo[m];// assign this one as new m;
+                op["_super"][m] = opm; //move original to super now
+            }
+        }
+        return op;
+    });
+};  
+
 
