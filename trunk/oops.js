@@ -271,7 +271,13 @@ Function.prototype.inherits = function(parentClass){
         if(aClassString.indexOf("__finalclass__") > 0){
 	        throw ("Final class can't be inherited.");
         }
-    }
+    };
+    var removeAbstractMethod = function(m,op,parentProps){
+        var rgxp =  new RegExp("this\."+m+" = .*isAbstract\(\).*(this\.\w+\s*=)?","igm");
+        parentProps = parentProps.replace(rgxp,"$1");
+        return parentProps;    
+    };
+
 	var op = new parentClass();
 	var oo = new this();
     var parentProps = parentClass.toString().replace(/\\s+/ig," ").replace(/}$/,"");
@@ -282,16 +288,15 @@ Function.prototype.inherits = function(parentClass){
     var childProps = this.toString().replace(/\\s+/ig," ").replace(/function\s*(\w+)?\(\)\s*{/,"");
 	var _s = "_s$s_";//Prefix for parent methods
 	var d  = Function.depth === undefined ? (Function.depth = 0) : (Function.depth = Function.depth+1);
+	_s += d;
 	
 	//Comment below code if we want multiple inheritance 
 	if(childProps.indexOf("_s$s_") > 0){
 		throw ("Multiple inheritance not allowed.");
 	}
-	while(d--){_s += "_"}
 	
 	for(m in op){
 		if(oo[m] === undefined) {
-			//console.log(m+"=>"+op[m].toSource());//.toSource());
 			if(op[m].toSource().indexOf("__abstract__") > 0){
 				throw ("Method '"+m+"' is abstract in parent class. Child class MUST override it.");
 			}
@@ -303,19 +308,22 @@ Function.prototype.inherits = function(parentClass){
 			//&& condition above is kind of marker to detect already inherited class
 			continue;
 		}
+		if(op[m].toSource().indexOf("__abstract__") > 0){
+            parentProps = removeAbstractMethod(m,op,parentProps);
+        }
 		if(op[m].toSource().indexOf("__final__") > 0){
 				throw ("Method '"+m+"' is final in parent class. Child class CAN'T override it.");
 		}
 		// i.e m in parent is overridden in child - so rename parent m and resolve super.m in child to renamed m
-		parentProps = parentProps.replace("this."+m,"var "+_s+m);
-		childProps = childProps.replace("_super."+m,_s+m);
+		parentProps = parentProps.replace("this."+m,"this."+_s+m).replace(/[ \r\n\t]+$/igm,"");// + " = this."+_s+m);
+		childProps = childProps.replace("this._super","_super").replace("_super."+m,"this."+_s+m);
 		delete _s;
 	}
 	var rgx = /_super.(\w+)/ig; //There is no real _super :). So in super.m, child actually trying to access private (actually protected) m of super which is already inherited by child
 	// so replace super.m for private m's to just m's in child which are availble in child if were there is parent;
 	childProps = childProps.replace(rgx,"$1");
 	
-	newObjectProps = "("+parentProps + childProps+")";
+	newObjectProps = "("+parentProps + childProps+".add$Proto())";
 	delete op;
 	delete oo;
 	delete parentProps;
@@ -348,28 +356,19 @@ Function.prototype.inherits = function(parentClass){
  * </pre>
  */
 Function.prototype.inheritsNative = function(nativeClass){
-    var oo = new this();
-    var me = this;
-    return (function(){
-        var op = new nativeClass();
-        op["_super"] = op;
-        for(m in oo){
-            if(op[m] === undefined) { //not overriding - parent don't have this method
-                if(oo[m].toSource().match(/[^\.]_super/igm)){
-                    op[m] = eval(oo[m].toSource().replace(/_super/igm,"this._super"));
-                }
-                //op[m] = oo[m]; //Assign parent method to child
-            }else{ //overriding - parent op already has this method
-                var opm = op[m]; //make a copy
-                if(oo[m].toSource().match(/[^\.]_super/igm)){
-                    op[m] = eval(oo[m].toSource().replace(/_super/igm,"this._super"));
-                }
-                //op[m] = oo[m];// assign this one as new m;
-                op["_super"][m] = opm; //move original to super now
-            }
-        }
-        return op;
-    });
+    var s = nativeClass.toString().replace(/[\n\t ]/igm," ").replace(/.*function\s*(\w+).*/igm,"$1");
+    var source = this.toString().replace(/\\s+/ig," ").replace(/function\s*(\w+)?\(\)\s*{/igm,"");
+    source = "(function(){var _super = this._super = new "+ s +"();" + source + ".add$Proto())";
+    source = source.replace(/_super\.(\w+)\s*\(/igm,"_super.$1.call(this,");
+    return eval(source);
 };  
 
+Function.prototype.add$Proto = function(){
+    var obj = new this();
+    if(obj._super)
+        this.prototype = obj._super;
+    else
+        this.prototype = new Object(); 
+    return this;    
+}
 
