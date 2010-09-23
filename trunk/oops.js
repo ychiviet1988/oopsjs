@@ -317,17 +317,12 @@ Function.prototype.inherits = function(parentClass){
 		// i.e m in parent is overridden in child - so rename parent m and resolve super.m in child to renamed m
 		parentProps = parentProps.replace("this."+m,"this."+_s+m).replace(/[ \r\n\t]+$/igm,"");// + " = this."+_s+m);
 		childProps = childProps.replace("this._super","_super").replace("_super."+m,"this."+_s+m);
-		delete _s;
 	}
 	var rgx = /_super.(\w+)/ig; //There is no real _super :). So in super.m, child actually trying to access private (actually protected) m of super which is already inherited by child
 	// so replace super.m for private m's to just m's in child which are availble in child if were there is parent;
 	childProps = childProps.replace(rgx,"$1");
 	
 	newObjectProps = "("+parentProps + childProps+".add$Proto())";
-	delete op;
-	delete oo;
-	delete parentProps;
-	delete childProps;
 	//delete this; some browsers don't allow to delete this
 	//console.log(newObjectProps);
 	return eval(newObjectProps);
