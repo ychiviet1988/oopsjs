@@ -41,26 +41,26 @@
  *		<b>this.render = function(){...here you define body...}</b>
  *		....
  *		
- *	}.<b>implements(IRenderable)</b>; 
+ *	}.<b>impls(IRenderable)</b>;
  *	//will throw exception if render method is not defined 
  *	</pre>
  * <h4>3. You can implement multiple interfaces as </h4>
  *  <pre>
  *	var CuteButton = function(){
  * 		...
- *	}.<b>implements(IRenderable,IClickable);</b>; 
+ *	}.<b>impls(IRenderable,IClickable);</b>;
  *  </pre> 
  *	<h4>OR like this</h4>
  *  <pre>
  *	var CuteButton = function(){
  * 		...
- *	}.<b>implements(IRenderable).implements(IClickable);</b>; 
+ *	}.<b>impls(IRenderable).impls(IClickable);</b>;
  *  </pre>
  *
  * @param iFaces comma separated list interfaces to be implemented
  * @returns this - the same class 
  */
-Function.prototype.implements = function(iFaces){
+Function.prototype.impls = function(iFaces){
 	var org = new this();
 	for(var i = 0, l = arguments.length; i < l; i++){
 		var iFace = arguments[i];
@@ -68,7 +68,7 @@ Function.prototype.implements = function(iFaces){
 			if(m && !iFace[m]._isEmpty()){
 				throw("Interface method " + m + " should not have body."); 
 			}
-        	if(m && m != "_super" && m != "implements" && m != "inherits" && typeof(iFace[m]) != typeof(org[m])){
+        	if(m && m != "_super" && m != "impls" && m != "inherits" && typeof(iFace[m]) != typeof(org[m])){
 				throw(this.toSource() + " does not implement '" + m +"'");
         	}
 			if(typeof(iFace[m]) === "function" && iFace[m].arity !== org[m].arity){
@@ -247,7 +247,7 @@ Function.prototype.isFinal = function(){
  *  <pre>
  *	var Manager = function(){
  * 		...
- *	}.<b>inherits(Employee).implements(IAuthor);</b>; 
+ *	}.<b>inherits(Employee).impls(IAuthor);</b>; 
  *	//Manager is inheriting employee and implementing IAuthor
  * </pre>
  * <p>and this is how <b>IAuthor</b> may look like</p>
