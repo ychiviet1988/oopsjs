@@ -158,7 +158,7 @@ var Manager = function(){
 		this.mustOverride = function(){}
 		//.isAbstract(); can be marked abstract here again to delete to child
 
-}.inherits(Employee).implements(IComparable);
+}.inherits(Employee).impls(IComparable);
 
 console.log("Creating new Employee with name Rajendra, id: 1");
 var emp = new Employee().init("Rajendra","1");
