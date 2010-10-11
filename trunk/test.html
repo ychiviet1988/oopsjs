@@ -8,6 +8,109 @@
         For more details on oops.js visit <a href="http://code.google.com/p/oopsjs/">http://code.google.com/p/oopsjs/</a> </div>
         <h4>Open your firebug or javascript console of your browser and see what's happening.</h4>
 	</body>
-	<script type="text/javascript" src="./oops.js"></script>
-	<script type="text/javascript" src="./examples/example.js"></script>
+	<script type="text/javascript" src="oops.js"></script>
+	<script type="text/javascript" src="examples/example.js"></script>
+	<script type="text/javascript">
+		var Person = function(){
+			var _name;
+			this.init = function(name){
+				_name = name;
+				return this;
+			};
+			this.getName = function(){
+				return _name;
+			};
+		};
+		
+		var Doctor = function(){
+			var _degree;
+			this.init = function(name,degree){
+				this._super.init(name);
+				_degree = degree;
+				return this;
+			};
+			this.getDegree = function(){
+				return _degree;
+			}
+		}.inherits(Person);
+		
+		var Surgeon = function(){
+			var _spe;
+			this.init = function(name,degree,spe){
+				this._super.init(name,degree);
+				_spe = spe;
+				return this;
+			};
+			this.getSpeciality = function(){
+				return _spe+_super.getName();
+			}
+		}.inherits(Doctor);
+		
+
+		//prototypical inheritance
+		
+		var Person1 = function(){
+			this._name = "";
+			this.init = function(name){
+				this._name = name;
+				return this;
+			};
+			this.getName = function(){
+				return this._name;
+			}
+		}
+		
+		var Doctor1 = function(){
+			this._degree;
+			this.init = function(name,degree){
+				this._super.init(name);
+				this._degree = degree;
+				return this;
+			};
+			this.getDegree = function(){
+				return this._degree;
+			}
+		}.inheritsProto(Person);
+		
+		var Surgeon1 = function(){
+			this._spe;
+			this.init = function(name,degree,spe){
+				this._super.init(name,degree);
+				this._spe = spe
+				return this;
+			};
+			this.getSpeciality = function(){
+				return this._spe;
+			}
+		}.inheritsProto(Doctor);
+		
+		
+		var sum = 0;
+		for(var c = 0 ; c < 20 ; c++){
+			var d = new Date().getTime();
+			for(var i = 0 ; i < 100000; i++){ //creating objects
+				var s = new Surgeon().init("Surgeon:"+i,"Degree:"+i,"Speciality:"+i);
+			}
+			var diff = new Date().getTime() - d;
+			//console.log("Creating objects took:" + diff)
+			sum += diff;
+		}
+		console.log("Creating objects ON AVERAGE took:" + (sum/20));
+		var sum = 0;
+		for(var c = 0 ; c < 20 ; c++){
+			var s = new Surgeon().init("Surgeon:1","Degree:1","Speciality:1");
+			var d = new Date().getTime();
+			for(var i = 0 ; i < 1000000; i++){ 
+				s.getName();
+			}
+			var diff = new Date().getTime() - d;
+			//console.log("Calling get name took:" + diff);
+			sum += diff;
+		}
+		console.log("Calling get name ON AVERAGE took:" + (sum/20));
+		
+		
+	</script>
+	
+	
 </html>

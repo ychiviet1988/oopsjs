@@ -119,7 +119,8 @@ Function.prototype.isAbstract = function(){
 	if(!this._isEmpty()){ //this is a class method
 		throw("Abstract method should not have body."); 
 	}
-	return function(){var __abstract__ = 'Abstract';throw(__abstract__+" method can't be called.")};
+	this._abstract = true;
+	return this;//function(){var __abstract__ = 'Abstract';throw(__abstract__+" method can't be called.")};
 };
 
 /**
@@ -145,15 +146,9 @@ Function.prototype.isAbstract = function(){
  *
  */
 Function.prototype.isFinal = function(){
-	var me = this;
-	try{
-	    var obj = new this();
-	    if(obj.init)
-	        return function(){var __finalclass__ = 'FinalClass';me.apply(obj,arguments); return obj;};
-	}catch(ex){
-
-	}
-	return function(){var __final__ = 'Final'; return me.apply(me,arguments);};
+	this._final = true;
+    return this;
+	//return function(){var __final__ = 'Final'; return me.apply(me,arguments);};
 };
 
 /**
@@ -267,11 +262,11 @@ Function.prototype.isFinal = function(){
  */
 
 Function.prototype.inherits = function(parentClass){
-    var checkIfInheritable = function(aClassString){
-        if(aClassString.indexOf("__finalclass__") > 0){
-	        throw ("Final class can't be inherited.");
-        }
-    };
+
+    if(parentClass._final){
+    	throw ("Final class can't be inherited.");
+    }
+
     var removeAbstractMethod = function(m,op,parentProps){
         var rgxp =  new RegExp("this\."+m+" = .*isAbstract\(\).*(this\.\w+\s*=)?","igm");
         parentProps = parentProps.replace(rgxp,"$1");
@@ -280,39 +275,40 @@ Function.prototype.inherits = function(parentClass){
 
 	var op = new parentClass();
 	var oo = new this();
-    var parentProps = parentClass.toString().replace(/\\s+/ig," ").replace(/}$/,"");
+	
+    var parentProps = parentClass.toString().replace(/\\s+|}$/ig," ");
+    
     if(parentProps.indexOf("[native code]") > 0){
         return this.inheritsNative(parentClass);
     }
-    checkIfInheritable(parentProps);
-    var childProps = this.toString().replace(/\\s+/ig," ").replace(/function\s*(\w+)?\(\)\s*{/,"");
+    
+    var childProps = this.toString().replace(/function\s*(\w+)?\(\)\s*{|\\s+/," ");
+
 	var _s = "_s$s_";//Prefix for parent methods
 	var d  = Function.depth === undefined ? (Function.depth = 0) : (Function.depth = Function.depth+1);
 	_s += d;
 	
 	//Comment below code if we want multiple inheritance 
-	if(childProps.indexOf("_s$s_") > 0){
+	if(this._inherited){//childProps.indexOf("_s$s_") > 0){
 		throw ("Multiple inheritance not allowed.");
 	}
 	
-	for(m in op){
+	for(m in op){//looping on parent method
 		if(oo[m] === undefined) {
-			if(op[m].toSource().indexOf("__abstract__") > 0){
+			if(op[m]._abstract){
 				throw ("Method '"+m+"' is abstract in parent class. Child class MUST override it.");
 			}
-		
 			// i.e m in parent is not overridden in child - so _super.m should resolve to this.m in this 
 			// as all parent m's are inherited to child automatically
 			var rgx = new RegExp("_super\\.("+m+")\s*(\(\))","ig");
-			childProps = childProps.replace(rgx,"(typeof(this.$1) !== 'undefined' && ('_s$s_'==='_s$s_') ? this.$1$2 : $1$2)"); 
-			//&& condition above is kind of marker to detect already inherited class
+			childProps = childProps.replace(rgx,"((typeof(this.$1) !== 'undefined') ? this.$1$2 : $1$2)"); 
 			continue;
 		}
-		if(op[m].toSource().indexOf("__abstract__") > 0){
+		if(op[m]._abstract){
             parentProps = removeAbstractMethod(m,op,parentProps);
         }
-		if(op[m].toSource().indexOf("__final__") > 0){
-				throw ("Method '"+m+"' is final in parent class. Child class CAN'T override it.");
+		if(op[m]._final){
+			throw ("Method '"+m+"' is final in parent class. Child class CAN'T override it.");
 		}
 		// i.e m in parent is overridden in child - so rename parent m and resolve super.m in child to renamed m
 		parentProps = parentProps.replace("this."+m,"this."+_s+m).replace(/[ \r\n\t]+$/igm,"");// + " = this."+_s+m);
@@ -358,12 +354,22 @@ Function.prototype.inheritsNative = function(nativeClass){
     return eval(source);
 };  
 
+/**
+ * inheritance using prototype   
+ */
+Function.prototype.inheritsProto = function(parentClass){
+    var me = this;
+    this.prototype = new parentClass();
+    this.prototype.constructor = me;
+    this.prototype._super = new parentClass();
+    return this;
+};
+
 Function.prototype.add$Proto = function(){
     var obj = new this();
     if(obj._super)
         this.prototype = obj._super;
-    else
-        this.prototype = new Object(); 
+	this._inherited = true;	
     return this;    
 }
 
